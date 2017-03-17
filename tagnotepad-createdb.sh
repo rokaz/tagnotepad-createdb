@@ -14,6 +14,10 @@ function usage () {
   exit 1
 }
 
+function filenametonotename () {
+  sed -e 's/.txt$//' -e 's@^.*/@@'
+}
+
 function initdb () {
   echo "Initializing database in $DB"
   # create database scheme
@@ -40,7 +44,8 @@ function addnotefromfile () {
   FILENAME="${1}"
   ## Debug
   #echo $FILENAME
-  NOTENAME="$(echo ${FILENAME} | sed -e 's/.txt$//')"
+  NOTENAME="$(echo ${FILENAME} | filenametonotename)"
+  #echo $NOTENAME
   NOTECONTENT="$(cat "${FILENAME}")"
   TIMESTAMP="$(date +%s%3N)"
   NOTEID=$(echo "SELECT _id FROM notes WHERE title='${NOTENAME}';" | $SQLITECMD $DB)
@@ -55,7 +60,8 @@ function addnotefromfile () {
 
 function settag () {
   TAGNAME="$1"
-  NOTENAME="$(echo ${2} | sed -e 's/.txt$//')"
+  #NOTENAME="$(echo ${2} | sed -e 's/.txt$//')"
+  NOTENAME="$(echo ${FILENAME} | filenametonotename)"
   TAGID=$(echo "SELECT _id FROM tags WHERE tagname='${TAGNAME}';" | $SQLITECMD $DB)
   NOTEID=$(echo "SELECT _id FROM notes WHERE title='${NOTENAME}';" | $SQLITECMD $DB)
   if [ -z $(echo "SELECT _id FROM mapping WHERE tagid='${TAGID}' AND noteid='${NOTEID}';" | $SQLITECMD $DB) ] ; then
