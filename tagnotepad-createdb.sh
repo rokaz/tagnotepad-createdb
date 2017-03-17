@@ -6,7 +6,6 @@ DB=tagnotepad.db
 function usage () {
   echo "Usage: $0 [options] [textfiles...]"
   echo "Options:"
-#  echo "  -a              Add the files to an existing database"
   echo "  -t <taglist>    Add tag(s) to the note(s) (comma separated list)"
   echo "  -h              Display this help and quit"
   echo
@@ -36,23 +35,17 @@ function addtag () {
     echo "Adding tag ${TAGNAME}"
     echo "INSERT INTO tags (tagname) VALUES('${1}');" | $SQLITECMD $DB
   fi
-  #echo "SELECT _id FROM "tags" WHERE tagname='${1}';" | $SQLITECMD $DB
-  #return $ID 
 }
 
 function addnotefromfile () {
   FILENAME="${1}"
-  ## Debug
-  #echo $FILENAME
   NOTENAME="$(echo ${FILENAME} | filenametonotename)"
-  #echo $NOTENAME
   NOTECONTENT="$(cat "${FILENAME}")"
   TIMESTAMP="$(date +%s%3N)"
   NOTEID=$(echo "SELECT _id FROM notes WHERE title='${NOTENAME}';" | $SQLITECMD $DB)
   if [ -z "$NOTEID" ] ; then 
     echo "Adding $FILE to the database"
     echo "INSERT INTO 'notes' (title, body, created, modified) VALUES ('${NOTENAME}', '${NOTECONTENT}', '${TIMESTAMP}', '${TIMESTAMP}');" | $SQLITECMD $DB 
-    #echo "INSERT INTO 'notes' (title, body, created, modified) VALUES ('${NOTENAME}', readfile('${FILENAME}'), '${TIMESTAMP}', '${TIMESTAMP}');" | $SQLITECMD $DB 
   else
     echo "Note ${NOTENAME} already existing... Skipping."
   fi
@@ -60,7 +53,6 @@ function addnotefromfile () {
 
 function settag () {
   TAGNAME="$1"
-  #NOTENAME="$(echo ${2} | sed -e 's/.txt$//')"
   NOTENAME="$(echo ${FILENAME} | filenametonotename)"
   TAGID=$(echo "SELECT _id FROM tags WHERE tagname='${TAGNAME}';" | $SQLITECMD $DB)
   NOTEID=$(echo "SELECT _id FROM notes WHERE title='${NOTENAME}';" | $SQLITECMD $DB)
@@ -95,9 +87,6 @@ do
 key="$1"
 
 case $key in
-#    -a|--add)
-#    NOINITDB=1
-#    ;;
     -t|--tag)
     SETTAG=1
     TAGLIST="${2}"
@@ -117,18 +106,11 @@ esac
 shift # past argument or value
 done
 
-## Debug
-#echo "NOINITDB=${NOINITDB}"
-#echo "SETTAG=${SETTAG}"
-#echo "TAGLIST=${TAGLIST}"
-#echo "FILELIST=${FILELIST}"
-
 # Create db if necessary 
 if [ -e $DB ] ; then
   echo "File $DB already exists, skipping database initialization"
 else 
   initdb
-  #echo "Skipping db init"
 fi
 
 # First, add the tags if present
@@ -152,22 +134,3 @@ for FILE in $FILELIST ; do
   fi
 done
 
-## Debug
-#case $1 in
-#  "initdb")
-#    initdb
-#  ;;
-#  "addtag")
-#    addtag "$2"
-#    echo $TAGID
-#  ;;
-#  "addnote")
-#    addnotefromfile "$2"
-#    echo $NOTEID
-#  ;;
-#  "settag")
-#    NOTEID=$2
-#    TAGID=$3
-#    settag
-#  ;;
-#esac
