@@ -40,7 +40,8 @@ function addtag () {
 function addnotefromfile () {
   FILENAME="${1}"
   NOTENAME="$(echo ${FILENAME} | filenametonotename)"
-  NOTECONTENT="$(cat "${FILENAME}")"
+  #Here, replacing single quotes with double single quotes as detailed here: http://stackoverflow.com/questions/603572/how-to-properly-escape-a-single-quote-for-a-sqlite-database
+  NOTECONTENT="$(cat "${FILENAME}" | sed -e "s/'/\'\'/g")"
   TIMESTAMP="$(date +%s%3N)"
   NOTEID=$(echo "SELECT _id FROM notes WHERE title='${NOTENAME}';" | $SQLITECMD $DB)
   if [ -z "$NOTEID" ] ; then 
